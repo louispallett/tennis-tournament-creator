@@ -30,7 +30,6 @@ function About() {
     })(8);
 
     const matches = generateMatches(players);
-    console.log(matches);
     
     for (let match of matches) {
         match.category = { name: "" };
