@@ -46,7 +46,7 @@ describe("Auth route (Sign in)", () => {
             const json = await res.json();
     
             expect(res.status).toBe(401);
-            expect(json.message).toBe("User not found");
+            expect(json.message).toBe("Invalid Credentials");
         });
     
         it("Should return 401 with incorrect password", async () => {
@@ -63,7 +63,7 @@ describe("Auth route (Sign in)", () => {
             const json = await res.json();
         
             expect(res.status).toBe(401);
-            expect(json.message).toBe("Incorrect Password");
+            expect(json.message).toBe("Invalid Credentials");
         });
     });
 })
