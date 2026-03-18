@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
 import User from "@/models/User";
 import { z } from "zod";
+import { rateLimitIP } from "@/lib/rateLimiter";
 
 const RegisterSchema = z.object({
   firstName: z.string().trim().min(1).max(50),
@@ -30,6 +31,14 @@ const RegisterSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.ip ?? req.headers.get("x-forwarded-for") ?? "unknown";
+
+    if (rateLimitIP(ip, 10, 60_000)) {
+      return NextResponse.json(
+        { message: "Too many login attempts, please try again later." },
+        { status: 429 },
+      )
+    }
     await connectToDB();
     const body = await req.json();
 
