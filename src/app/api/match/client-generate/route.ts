@@ -35,7 +35,6 @@ export async function POST(req:NextRequest) {
 
         const { players } = parsed.data;
         const numOfPlayers = players.length;
-        console.log(players);
         const matches = generateMatches(players);
 
         // The total number of matches must equal the number of players - 1. This is a fail-safe in case it doesn't.
