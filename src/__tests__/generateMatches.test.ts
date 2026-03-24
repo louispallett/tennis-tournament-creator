@@ -1,14 +1,5 @@
 import { generateMatches } from "@/lib/generateMatches";
 
-interface MatchTypeLite {
-    _id:string,
-    tournamentRoundText:string,
-    participants:string[],
-    nextMatchId:string | null,
-    qualifyingMatch:boolean,
-    previousMatchId?:string[]
-};
-
 const createPlayers = (n:number):string[] => {
     const result:string[] = [];
     for (let i = 1; i <= n; i++) {
@@ -46,7 +37,7 @@ describe("Generating Matches", () => {
 
 describe("Assigning players", () => {
     describe("Normal (^2) tournament", () => {
-        const matches:MatchTypeLite[] = generateMatches(createPlayers(32));
+        const matches = generateMatches(createPlayers(32));
 
         it("Participants assigned correctly", () => {
             expect(matches[15].participants).toEqual(["1", "32"]);
@@ -58,7 +49,7 @@ describe("Assigning players", () => {
     });
     
     describe("Single qualifying matches (10 players)", () => {
-        const matches:MatchTypeLite[] = generateMatches(createPlayers(10));
+        const matches = generateMatches(createPlayers(10));
         const qualifyingRound = matches.slice(7);
         const firstRound = matches.slice(3, 7);
         
@@ -73,7 +64,7 @@ describe("Assigning players", () => {
     });
 
     describe("Double qualifying matches (15 players)", () => {
-        const matches:MatchTypeLite[] = generateMatches(createPlayers(15));
+        const matches = generateMatches(createPlayers(15));
         const qualifyingRound = matches.slice(7);
         const firstRound = matches.slice(3, 7);
         it("Participants assigned correctly", () => {
