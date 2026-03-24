@@ -31,7 +31,7 @@ const RegisterSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    const ip = req.ip ?? req.headers.get("x-forwarded-for") ?? "unknown";
+    const ip = req.headers.get("x-forwarded-for") ?? "unknown";
 
     if (rateLimitIP(ip, 10, 60_000)) {
       return NextResponse.json(
