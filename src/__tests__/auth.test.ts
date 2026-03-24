@@ -1,6 +1,7 @@
 import { POST } from "@/app/api/auth/route";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
+import { NextRequest } from "next/server";
 
 describe("Auth route (Sign in)", () => {
     beforeEach(async () => {
@@ -24,8 +25,9 @@ describe("Auth route (Sign in)", () => {
                 }),
                 headers: { "Content-Type": "application/json" }
             });
-    
-            const res = await POST(req);
+
+            const nextRequest = new NextRequest(req);
+            const res = await POST(nextRequest);
     
             expect(res.status).toBe(200);
         });
@@ -42,7 +44,8 @@ describe("Auth route (Sign in)", () => {
                 headers: { "Content-Type": "application/json" }
             });
     
-            const res = await POST(req);
+            const nextRequest = new NextRequest(req);
+            const res = await POST(nextRequest);
             const json = await res.json();
     
             expect(res.status).toBe(401);
@@ -59,7 +62,8 @@ describe("Auth route (Sign in)", () => {
                 headers: { "Content-Type": "application/json" }
             });
         
-            const res = await POST(req);
+            const nextRequest = new NextRequest(req);
+            const res = await POST(nextRequest);
             const json = await res.json();
         
             expect(res.status).toBe(401);

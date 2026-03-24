@@ -5,6 +5,7 @@ import Category from "@/models/Category";
 import Match from "@/models/Match";
 import { GET, POST } from "@/app/api/match/route";
 import mongoose from "mongoose";
+import { NextRequest } from "next/server";
 
 describe("API for match route", () => {
     let userId:string;
@@ -86,7 +87,8 @@ describe("API for match route", () => {
             headers: { "Content-Type": "application/json" }
         });
 
-        const res = await POST(req);
+        const nextRequest = new NextRequest(req);
+        const res = await POST(nextRequest);
         const json = await res.json();
 
         expect(res.status).toBe(201);

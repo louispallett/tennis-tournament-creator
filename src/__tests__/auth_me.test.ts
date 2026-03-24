@@ -25,7 +25,8 @@ describe("Auth ME route (authentication)", () => {
             headers: { "Content-Type": "application/json" }
         });
 
-        const res = await POST(req);
+        const nextRequest = new NextRequest(req);
+        const res = await POST(nextRequest);
         const json = await res.json();
 
         token = json.token;

@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
+import { NextRequest } from "next/server";
 
 jest.mock("next/headers", () => ({
     cookies: jest.fn()
@@ -71,7 +72,8 @@ describe("API for category route", () => {
             headers: { "Content-Type": "application/json" }
         });
 
-        const res = await POST(req);
+        const nextRequest = new NextRequest(req);
+        const res = await POST(nextRequest);
         const json = await res.json();
 
         expect(res.status).toBe(201);

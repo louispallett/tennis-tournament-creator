@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import User from "@/models/User";
 import { GET, POST } from "@/app/api/tournament/route";
 import Tournament from "@/models/Tournament";
+import { NextRequest } from "next/server";
 
 jest.mock("next/headers", () => ({
     cookies: jest.fn()
@@ -63,7 +64,8 @@ describe("API for tournament route", () => {
             headers: { "Content-Type": "application/json" }
         });
 
-        const res = await POST(req);
+        const nextRequest = new NextRequest(req);
+        const res = await POST(nextRequest);
         const json = await res.json();
 
         expect(res.status).toBe(201);

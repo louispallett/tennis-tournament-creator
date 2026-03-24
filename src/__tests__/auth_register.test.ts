@@ -1,4 +1,5 @@
 import { POST } from "@/app/api/auth/register/route";
+import { NextRequest } from "next/server";
 
 describe("API for User model", () => {
   it("Creates a user", async () => {
@@ -15,7 +16,8 @@ describe("API for User model", () => {
       headers: { "Content-Type": "application/json" },
     });
 
-    const res = await POST(req);
+    const nextRequest = new NextRequest(req);
+    const res = await POST(nextRequest);
     const json = await res.json();
 
     expect(res.status).toBe(201);
@@ -36,7 +38,8 @@ describe("API for User model", () => {
       headers: { "Content-Type": "application/json" },
     });
 
-    const res = await POST(req);
+    const nextRequest = new NextRequest(req);
+    const res = await POST(nextRequest);
     const json = await res.json();
 
     expect(res.status).toBe(201);
@@ -56,7 +59,8 @@ describe("API for User model", () => {
       headers: { "Content-Type": "application/json" },
     });
 
-    const res = await POST(req);
+    const nextRequest = new NextRequest(req);
+    const res = await POST(nextRequest);
 
     expect(res.status).toBe(400);
   });
