@@ -69,5 +69,38 @@ describe("Auth route (Sign in)", () => {
             expect(res.status).toBe(401);
             expect(json.message).toBe("Invalid Credentials");
         });
+
+        /* Rate Limiter Test
+         * ------------------
+         *
+         *  Designed to ensure 429 error on repeated requests.
+         *
+         *  Not the most elegant, but handles basic brute force.
+         *
+         * -------------------
+         */
+
+        it("Should return 429 on repeated attempts", async () => {
+            const req = new Request("http:localhost/api/auth", {
+                method: "POST",
+                body: JSON.stringify({
+                    email: "john.doe@example.com",
+                    password: "HelloWorld1"
+                }),
+                headers: { 
+                  "Content-Type": "application/json",
+                  "x-forwarded-for": "127.0.0.1" 
+                }
+            });
+        
+            const nextRequest = new NextRequest(req);
+
+            for (let i = 0; i < 10; i++) {
+                await POST(nextRequest);
+            }
+            
+            const res = await POST(nextRequest);
+            expect(res.status).toBe(429);
+        });
     });
 })
