@@ -19,7 +19,7 @@ export async function GET(req:NextRequest, { params }: { params: { id:string }})
         const { tournamentId } = parsed.data;
 
         const allCategories = await Category.find({ tournament: tournamentId });
-        const invalid = [];
+        const invalid: Number[] = [];
 
         for (let category of allCategories) {
             const players = await Player.find({ categories: { $in: category._id } });

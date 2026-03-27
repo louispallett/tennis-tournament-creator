@@ -16,7 +16,7 @@ export default function CloseDraw({ tournamentId, setIsPlayOpen }:CloseDrawProps
     
     const validateTournament = () => {
         setLoading(true);
-        axios.get(`/api/tournament/validateDraw/${tournamentId}`)
+        axios.get(`/api/tournament/${tournamentId}/validateDraw`)
             .then((response) => {
                 setInValidatedData(response.data);
                 setSubmitted(true);

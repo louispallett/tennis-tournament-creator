@@ -16,7 +16,7 @@ export default function CloseRegistration({ tournamentId, setIsCloseRegOpen }:Cl
 
     const validateTournament = () => {
         setLoading(true);
-        axios.get(`/api/tournament/validateTournament/${tournamentId}`)
+        axios.get(`/api/tournament/${tournamentId}/validateTournament/`)
             .then((response) => {
                 setInValidatedData(response.data);
                 setSubmitted(true);

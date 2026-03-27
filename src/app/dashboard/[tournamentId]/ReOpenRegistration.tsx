@@ -17,7 +17,7 @@ export default function ReOpenRegistration({ setIsOpen }:ReOpenRegistrationProps
 
     const validateTournament = () => {
         setLoading(true);
-        axios.get(`/api/tournament/validateReOpen/${params.tournamentId}`)
+        axios.get(`/api/tournament/${params.tournamentId}/validateReOpen/`)
             .then((response) => {
                 setInValidatedData(response.data);
                 setSubmitted(true);

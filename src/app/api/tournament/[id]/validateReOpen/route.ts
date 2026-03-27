@@ -19,7 +19,7 @@ export async function GET(req:NextRequest, { params }: { params: { id:string }})
         if (!parsed.success) throw new HttpError(parsed.error.message, 400);
         const { tournamentId } = parsed.data;
 
-        const invalid = [];
+        const invalid: Number[] = [];
 
         const teams = await Team.find({ tournament: tournamentId });
         const matches = await Match.find({ tournament: tournamentId });
