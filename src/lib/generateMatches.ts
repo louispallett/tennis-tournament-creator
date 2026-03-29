@@ -61,7 +61,7 @@
  *
  *  This is where our matchesOrdered variable (result of reorderArray()) is very handy. Note that earlier in the 
  *  function we create a variable called:
- *      qualifyingPlayers
+ *      qualifyingParticipants
  *  This calculates the number of players needed for the qualifyingMatches (which is the number of matches * 2, since
  *  all qualifying matches must have exactly 2 players each). This leaves the participants array with the remaining
  *  players who are in this firstRound (the first non-qualifying round) - also known as our byes.
@@ -72,7 +72,7 @@
  *      matchesOrdered[index] //? This is what we use it for
  *  //? Note - this is how we allocate players even in a ^2 case, this works the same as the previous method, but 
  *  //? it also works for this !^2 case, to make the code universal.
- *  This means we then add the qualifyingPlayers sequentially to the firstRound matches. This means the top player 
+ *  This means we then add the qualifyingParticipants sequentially to the firstRound matches. This means the top player 
  *  is allocated to first item, the second to the next one, and so on. However, remember that because matchesOrdered
  *  is a clever order which means that the second player is actually on the other side of the bracket (since the 
  *  original index was the final subarray).
@@ -107,7 +107,8 @@
  * ============================================================================================================= */
 
 import mongoose from "mongoose";
-import { MatchTypeLite, PlayerTypeClient, TeamTypeClient } from "./types";
+import { MatchTypeLite,  PlayerTypePopulated, TeamTypePopulated } from "./types";
+import HttpError from "./HttpError";
 
 const getNextPowerOfTwo = (n:number):number => {
     let power = 1;
@@ -177,16 +178,16 @@ const createMatch = (
     return match;
 }
 
-const generateFirstRoundMatches = (numOfPlayers:number):MatchTypeLite[][] => {
-    const totalRounds = Math.ceil(Math.log2(numOfPlayers));
+const generateFirstRoundMatches = (numOfParticipants:number):MatchTypeLite[][] => {
+    const totalRounds = Math.ceil(Math.log2(numOfParticipants));
     const matchesByRound = [];
-    const numOfQualPlayers = numOfPlayers - calculateByes(numOfPlayers);
+    const numOfQualPlayers = numOfParticipants - calculateByes(numOfParticipants);
 
     const finalMatch = createMatch(totalRounds);
     matchesByRound.push([finalMatch]);
     let round = 1;
 
-    while(round < (qualPlayersEqualsTotalPlayers(numOfQualPlayers, numOfPlayers, totalRounds))) {
+    while(round < (qualPlayersEqualsTotalPlayers(numOfQualPlayers, numOfParticipants, totalRounds))) {
         const currentRoundMatches = [];
         for (let i = 0; i < matchesByRound.at(-1)!.length * 2; i++) {
             const nextMatchId = matchesByRound[round - 1][Math.floor(i / 2)]._id;
@@ -200,28 +201,32 @@ const generateFirstRoundMatches = (numOfPlayers:number):MatchTypeLite[][] => {
     return matchesByRound;
 }
 
-type participantType = PlayerTypeClient[] | TeamTypeClient[] | string[];
-
-export function generateMatches(participants:participantType):MatchTypeLite[] {
-    const numOfPlayers = participants.length;
-    const matches = generateFirstRoundMatches(numOfPlayers);
+export function generateMatches(participants: PlayerTypePopulated[] | TeamTypePopulated[]):MatchTypeLite[] {
+    const numOfParticipants = participants.length;
+    const matches = generateFirstRoundMatches(numOfParticipants);
     const firstRound = matches.pop() ?? [];
-    if (firstRound.length < 1) throw new Error("Error creating matches");
+    if (firstRound.length < 1) throw new Error("Generate Matches Error: GM001");
 
     const intoFours = splitIntoFours(firstRound);
     const groupsOrdered = reorderGroups(intoFours);
     const matchesOrdered = reorderArray(groupsOrdered);
-    const qualifyingPlayersNum = numOfPlayers - calculateByes(numOfPlayers)
-    const qualifyingPlayers = qualifyingPlayersNum === participants.length 
+    const qualifyingParticipantsNum = numOfParticipants - calculateByes(numOfParticipants)
+    const qualifyingParticipants = qualifyingParticipantsNum === participants.length 
         ? participants
-        : participants.splice(0, participants.length - qualifyingPlayersNum);
+        : participants.splice(0, participants.length - qualifyingParticipantsNum);
     const n = matchesOrdered.length;
 
     for (let i = 0; i < 2 * n; i++) {
         const index = i < n ? i : 2 * n - i - 1;
-        if (qualifyingPlayers.length > 0) {
-            const player = qualifyingPlayers.shift();
-            matchesOrdered[index].participants.push(player);
+        if (qualifyingParticipants.length > 0) {
+            const participant = qualifyingParticipants.shift();
+            if (!participant) throw new HttpError("Generate Matches Error: GM002")
+
+            if (participant.hasOwnProperty("user")) {
+                (matchesOrdered[index].participants as PlayerTypePopulated[]).push(participant as PlayerTypePopulated);
+            } else {
+                (matchesOrdered[index].participants as TeamTypePopulated[]).push(participant as TeamTypePopulated);
+            }
         } else {
             break;
         }
@@ -243,11 +248,25 @@ export function generateMatches(participants:participantType):MatchTypeLite[] {
     }
 
     for (const match of qualifyingMatches) {
-        match.participants.push(participants.pop());
-    }
-    
+        const participant = participants.pop();
+        if (!participant) throw new HttpError("Generate Matches Error: GM003");
+
+        if (participant.hasOwnProperty("user")) {
+            (match.participants as PlayerTypePopulated[]).push(participant as PlayerTypePopulated);
+        } else {
+            (match.participants as TeamTypePopulated[]).push(participant as TeamTypePopulated);
+        }
+    }                     
+                          
     for (const match of qualifyingMatches.reverse()) {
-        match.participants.push(participants.shift());
+        const participant = participants.shift();
+        if (!participant) throw new HttpError("Generate Matches Error: GM003");
+        
+        if (participant.hasOwnProperty("user")) {
+            (match.participants as PlayerTypePopulated[]).push(participant as PlayerTypePopulated);
+        } else {
+            (match.participants as TeamTypePopulated[]).push(participant as TeamTypePopulated);
+        }
     }
 
     const result = [...matches.flat(), ...matchesOrdered, ...qualifyingMatches];

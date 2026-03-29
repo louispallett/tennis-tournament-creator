@@ -1,9 +1,28 @@
 import { generateMatches } from "@/lib/generateMatches";
+import { PlayerTypePopulated } from "@/lib/types";
+import { Types } from "mongoose";
 
-const createPlayers = (n:number):string[] => {
-    const result:string[] = [];
+const generatePlayer = (i: number): PlayerTypePopulated => {
+    return {
+        _id: i.toString(),
+        tournament: new Types.ObjectId(),
+        user: {
+            firstName: i.toString(),
+            lastName: "",
+            fullname: i.toString()
+        },
+        male: true,
+        categories: [],
+        seeded: false,
+        ranking: i
+    }
+}
+
+const createPlayers = (n:number): PlayerTypePopulated[] => {
+    const result: PlayerTypePopulated[] = [];
     for (let i = 1; i <= n; i++) {
-        result.push(i.toString());
+        result.push(generatePlayer(i));
+
     }
     return result;
 }
@@ -40,11 +59,12 @@ describe("Assigning players", () => {
         const matches = generateMatches(createPlayers(32));
 
         it("Participants assigned correctly", () => {
-            expect(matches[15].participants).toEqual(["1", "32"]);
-            expect(matches[16].participants).toEqual(["2", "31"]);
-            expect(matches[17].participants).toEqual(["3", "30"]);
-            expect(matches[18].participants).toEqual(["4", "29"]);
-            expect(matches[30].participants).toEqual(["16", "17"]);
+            expect(matches[15].participants[0].ranking).toEqual(1);
+            expect(matches[15].participants[1].ranking).toEqual(32);
+            expect(matches[16].participants[0].ranking).toEqual(2);
+            expect(matches[16].participants[1].ranking).toEqual(31);
+            expect(matches[30].participants[0].ranking).toEqual(16);
+            expect(matches[30].participants[1].ranking).toEqual(17);
         });
     });
     
@@ -58,8 +78,9 @@ describe("Assigning players", () => {
             expect(qualifyingRound[1].participants.length).toBe(2);
             expect(firstRound[0].participants.length).toBe(1);
             expect(firstRound[1].participants.length).toBe(1);
-            expect(firstRound[0].participants).toEqual(["1"]);
-            expect(firstRound[2].participants).toEqual(["3", "6"]);            
+            expect(firstRound[0].participants[0].ranking).toEqual(1);
+            expect(firstRound[2].participants[0].ranking).toEqual(3);            
+            expect(firstRound[2].participants[1].ranking).toEqual(6);
         });
     });
 
@@ -70,10 +91,11 @@ describe("Assigning players", () => {
         it("Participants assigned correctly", () => {
             expect(qualifyingRound[0].participants.length).toBe(2);
             expect(qualifyingRound[1].participants.length).toBe(2);
-            expect(qualifyingRound[6].participants).toEqual(["15", "8"]);
+            expect(qualifyingRound[6].participants[0].ranking).toEqual(15);
+            expect(qualifyingRound[6].participants[1].ranking).toEqual(8);
             expect(firstRound[0].participants.length).toBe(1);
             expect(firstRound[1].participants.length).toBe(0);
-            expect(firstRound[0].participants).toEqual(["1"]);
+            expect(firstRound[0].participants[0].ranking).toEqual(1);
             expect(firstRound[2].participants).toEqual([]);    
         });
     });
