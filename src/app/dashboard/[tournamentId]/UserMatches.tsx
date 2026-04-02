@@ -1,13 +1,11 @@
 "use client"
 
-import { MatchType, UserType } from "@/lib/types"
+import { MatchType, PlayerType, UserType } from "@/lib/types"
 import axios from "axios"
 import { useEffect, useState } from "react"
-import { useForm } from "react-hook-form"
 import { useRef } from "react";
-import { ChevronDownIcon } from "@heroicons/react/16/solid";
 import NoInfo from "./NoInfo"
-import SubmitResultsForm from "./SubmitResultsForm.tsx";
+import SubmitResultsForm from "./SubmitResultsForm";
 
 type UserMatchesProps = { 
     userMatches:MatchType[],
@@ -57,7 +55,7 @@ export default function UserMatches({ userMatches, stage }:UserMatchesProps) {
 
 
 type MatchCardProps = {
-    setIsOpen:any
+    setIsOpen: (v: MatchType | null) => void,
     data:MatchType
 }
 
@@ -79,8 +77,6 @@ function MatchCard({ setIsOpen, data }:MatchCardProps) {
         </div>
     )
 }
-
-type MatchInfoProps = { data: MatchType };
 
 function MatchInfo({ data, setIsOpen }:MatchCardProps) {
     const [loading, setLoading] = useState(true);
@@ -126,7 +122,7 @@ useEffect(() => {
                     <h5 className="text-white">Contact Details</h5>
                     { users && (
                         <div>
-                            { users.map(player => (
+                            { users.map((player: PlayerType) => (
                                 <ContactDetails user={player} key={player._id}/>
                             ))}
                         </div>

@@ -1,15 +1,15 @@
-import { getCategoryPopulated } from "@/lib/categories";
+import { getCategoryInfo } from "@/lib/categories"
 import { getMatchesByCategory } from "@/lib/matches";
-import { getPopulatedPlayersByCategory } from "@/lib/players";
+import { getPlayersByCategory, toPlayerClient } from "@/lib/players";
+import { getTeamsByCategory, toTeamClient } from "@/lib/teams";
 import { getTournamentById } from "@/lib/tournaments";
-import { getPopulatedTeamsByCategory } from "@/lib/teams";
-import { CategoryTypePopulated, MatchType, PlayerTypePopulated, TeamTypePopulated, TournamentType } from "@/lib/types";
-import { notFound } from "next/navigation";
+import { CategoryType, MatchType, MatchTypeLite, PlayerType, TeamType, TournamentType } from "@/lib/types";
+import Link from "next/link";
 import GenerateMatches from "./GenerateMatches";
 import RemovePlayers from "./RemovePlayers";
 import CreateTeams from "./CreateTeams";
-import StagePlay from "./StagePlay";
-import Link from "next/link";
+import StagePlay from "./StagePlay.tsx";
+import { notFound } from "next/navigation";
 
 type CategoryPageProps = {
     params: {
@@ -18,19 +18,24 @@ type CategoryPageProps = {
     }
 }
 
-export default async function CategoryPage({ params }: CategoryPageProps) {
-    const { tournamentId, categoryId } = await params;
+export default async function CategoryPage({ params }:CategoryPageProps) {
+    const {tournamentId, categoryId } = await params;
 
-    const tournament = await getTournamentById(tournamentId);
-    const category = await getCategoryPopulated(categoryId);
-
-    if (!tournament || !category) {
+    let tournament, category;
+    try {
+        tournament = await getTournamentById(tournamentId);
+        category = await getCategoryInfo(categoryId);
+        if (!tournament || !category) {
+            notFound();
+        }
+    } catch(err) {
+        console.error("Error fetching data: ", err);
         notFound();
     }
-
-    const players = await getPopulatedPlayersByCategory(categoryId);
+    
+    const players = await getPlayersByCategory(categoryId);
     const matches = await getMatchesByCategory(categoryId);
-    const teams = await getPopulatedTeamsByCategory(categoryId);
+    const teams = await getTeamsByCategory(categoryId);
 
     return (
         <div className="flex flex-col gap-5 sm:mx-1.5 lg:mx-5">
@@ -46,14 +51,14 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                 </button>
             </Link>
         </div>
-    );
+    )
 }
 
 type CategoryInfoProps = {
-    category:CategoryTypePopulated,
-    players:PlayerTypePopulated[],
+    category:CategoryType,
+    players:PlayerType[],
     matches:MatchType[],
-    teams:TeamTypePopulated[]
+    teams:TeamType[]
 }
 
 function CategoryInfo({ category, players, matches, teams }:CategoryInfoProps) {
@@ -104,10 +109,10 @@ function CategoryInfo({ category, players, matches, teams }:CategoryInfoProps) {
                 </>
             )}
         </div>
-    );
+    )
 }
 
-type PlayerCardProps = { info:PlayerTypePopulated }
+type PlayerCardProps = { info:PlayerType }
 
 function PlayerCard({ info }:PlayerCardProps) {
     return (
@@ -120,7 +125,7 @@ function PlayerCard({ info }:PlayerCardProps) {
     )
 }
 
-type TeamCardProps = { info:TeamTypePopulated }
+type TeamCardProps = { info:TeamType }
 
 function TeamCard({ info }:TeamCardProps) {
     return (
@@ -132,12 +137,11 @@ function TeamCard({ info }:TeamCardProps) {
     )
 }
 
-
 type ActionProps = {
     tournament:TournamentType,
-    category:CategoryTypePopulated,
-    teams:TeamTypePopulated[],
-    players:PlayerTypePopulated[],
+    category:CategoryType,
+    teams:TeamType[],
+    players:PlayerType[],
     matches:MatchType[]
 }
 
@@ -154,10 +158,10 @@ function Actions({ tournament, category, teams, players, matches }:ActionProps) 
         <div className="standard-container-no-shadow bg-slate-100 flex flex-col gap-2.5">
             <h3>Category Operations: {stage.toUpperCase()}</h3>
             { stage === "sign-up" && (
-                <StageSignUp tournament={tournament} />
+                <StageSignUp tournament={tournament} category={category} teams={teams} players={players} />
             )}
             { stage === "draw" && (
-                <StageDraw category={category} teams={teams} players={players} />
+                <StageDraw tournament={tournament} category={category} teams={teams} players={players} />
             )}
             { stage === "play" && (
                 <StagePlay matches={matchesClient} />
@@ -165,16 +169,12 @@ function Actions({ tournament, category, teams, players, matches }:ActionProps) 
             { stage === "finished" && (
                 <StageFinished />
             )}
-
         </div>
-    );
+    )
 }
 
-type StageSignUpProps = {
-    tournament:TournamentType,
-}
-
-function StageSignUp({ tournament }:StageSignUpProps) {
+function StageSignUp({ tournament, category, players }:ActionProps) {
+    const clientPlayers = players.map(toPlayerClient);
     return (
         <>
             <h4>Creating Matches & Teams</h4>
@@ -182,23 +182,25 @@ function StageSignUp({ tournament }:StageSignUpProps) {
                 Registration is open. This means players can join up using the tournament code <b>{tournament.code}</b>. On this 
                 page, you'll be able to see who has currently signed up to this tournament. You can remove players from the category below.
             </p>
+            <RemovePlayers players={clientPlayers} categoryId={JSON.parse(JSON.stringify(category._id))} />
         </>
     )    
 }
 
-type StageDrawProps = {
-    category: CategoryTypePopulated,
-    teams: TeamTypePopulated[],
-    players: PlayerTypePopulated[]
-}
-
-function StageDraw({ category, teams, players }: StageDrawProps) {
+function StageDraw({ tournament, category, teams, players }:ActionProps) {
     const teamCreation:boolean = category.doubles && teams.length < 1;
 
-    let clientPlayers: PlayerTypePopulated[] | TeamTypePopulated[] = players;
+    let clientPlayers;
 
-    if (category.doubles && teams.length > 0) {
-        clientPlayers = teams;
+    // TODO: This is actually necessary - we basically want to pass two possible options into one variable!
+    if (teamCreation) {
+        clientPlayers = players.map(toPlayerClient);
+    } else {
+        if (category.doubles) {
+            clientPlayers = teams.map(toTeamClient);
+        } else {
+            clientPlayers = players.map(toPlayerClient);
+        }
     }
 
     const categoryLocked:boolean = category.locked;
@@ -216,10 +218,9 @@ function StageDraw({ category, teams, players }: StageDrawProps) {
                                 If this category has seeded players, each seeded player will be matched with a non-seeded player until there are none left, and the remaining 
                                 non-seeded players will be matched together.
                             </p>
-                            <CreateTeams category={JSON.parse(JSON.stringify(category))} players={players}  />
+                            <CreateTeams category={JSON.parse(JSON.stringify(category))} players={clientPlayers}  />
                         </>
                     ) : (
-                        // Note - if passing participants here is an issue, we can just use JSON.parse(JSON.stringify())
                         <GenerateMatches participants={clientPlayers} categoryId={category._id.toString()} doubles={category.doubles} />
                     )}
                     <RemovePlayers players={clientPlayers} categoryId={JSON.parse(JSON.stringify(category._id))} />
@@ -235,4 +236,12 @@ function StageFinished() {
     return (
         <p>This tournament is finished.</p>
     )
+}
+
+// Both below will have to be client components
+function DangerZone() {
+
+}
+function DeleteDialog() {
+    
 }

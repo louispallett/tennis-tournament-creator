@@ -1,20 +1,20 @@
 "use client"
 
 import { generateMatches } from "@/lib/generateMatches";
-import { MatchType, PlayerTypeClient, TeamTypeClient } from "@/lib/types";
+import { MatchType, MatchTypeLite, PlayerTypeClient, PlayerTypePopulated, TeamTypeClient, TeamTypePopulated } from "@/lib/types";
 import axios from "axios";
 import { useState } from "react"
 import { useForm } from "react-hook-form";
 import Bracket from "../../Bracket";
 
 type GenerateMatchesProps = {
-    participants:PlayerTypeClient[] | TeamTypeClient[],
+    participants:PlayerTypePopulated[] | TeamTypePopulated[],
     categoryId:string,
     doubles:boolean
 }
 
 export default function GenerateMatches({ participants, categoryId, doubles }:GenerateMatchesProps) {
-    const [matches, setMatches] = useState([]);
+    const [matches, setMatches] = useState<MatchTypeLite[]>([]);
 
     const handleGenerateMatches = () => {
         const newMatches = generateMatches(participants);
@@ -38,7 +38,7 @@ export default function GenerateMatches({ participants, categoryId, doubles }:Ge
 }
 
 type GeneratedMatchesProps = { 
-    matches:MatchType[],
+    matches:MatchTypeLite[],
     categoryId:string
     doubles:boolean
 }

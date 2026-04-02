@@ -1,5 +1,6 @@
 "use client"
 
+import { CategoryType } from "@/lib/types";
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/16/solid";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -60,7 +61,7 @@ export default function JoinTournamentForm({ validTournament }: { validTournamen
             })
     }
 
-    const [tournamentCategories, setTournamentCategories] = useState(null);
+    const [tournamentCategories, setTournamentCategories] = useState<string[] | null>(null);
 
     useEffect(() => {
         const getCategories = () => {

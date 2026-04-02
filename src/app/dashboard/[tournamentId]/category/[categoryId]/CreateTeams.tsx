@@ -1,16 +1,16 @@
 "use client"
 
 import { createMixedTeams, createTeams } from "@/lib/createTeams"
-import { CategoryType, PlayerTypeClient, TeamType, TeamTypeClient } from "@/lib/types"
+import { CategoryTypePopulated, PlayerTypePopulated } from "@/lib/types"
 import axios from "axios"
 import { useState } from "react"
 
 type CreateTeamsProps = {
-    category:CategoryType
-    players:PlayerTypeClient[]
+    category: CategoryTypePopulated
+    players: PlayerTypePopulated[]
 }
 
-const extractIds = (players:PlayerTypeClient[]):string[] => {
+const extractIds = (players:PlayerTypePopulated[]):string[] => {
     const result:string[] = [];
     for (const player of players) {
         result.push(player._id);
@@ -18,16 +18,32 @@ const extractIds = (players:PlayerTypeClient[]):string[] => {
     return result;
 }
 
+interface TeamLite {
+    tournament: string,
+    category: string,
+    players: PlayerTypePopulated[],
+    ranking: number
+};
+
 export default function CreateTeams({ category, players }:CreateTeamsProps) {
-    const [loading, setLoading] = useState(false);
-    const [teams, setTeams] = useState([]);
-    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [teams, setTeams] = useState<TeamLite[]>([]);
+    const [error, setError] = useState<string | null>(null);
+
+    /* 
+     * In this function, we divide seeded and non-seeded, extract their _ids into the createTeams function.
+     *
+     * This function matches _id values together and returns a multi-dimensional array of strings.
+     *
+     * We then pass iterate over each pair and create a 'lite' team object.
+     *
+    */
     
     const generateTeams = () => {
         setLoading(true);
         let newTeams:string[][] = [];
-        const seeded = players.filter(x => x.seeded);
-        const nonSeeded = players.filter(x => !x.seeded)
+        const seeded = players.filter((x: PlayerTypePopulated) => x.seeded);
+        const nonSeeded = players.filter((x: PlayerTypePopulated) => !x.seeded)
         if (category.name === "Mixed Doubles") {
             let maleSeeded = seeded.filter(x => x.male);
             let femaleSeeded = seeded.filter(x => !x.male);
@@ -46,8 +62,12 @@ export default function CreateTeams({ category, players }:CreateTeamsProps) {
         for (let team of newTeams) {
             const player1 = players.find(x => x._id == team[0]);
             const player2 = players.find(x => x._id == team[1]);
+            if (!player1 || !player2) {
+                console.error("Player assignment failed");
+                return;
+            }
             const teamObj = {
-                tournament: category.tournament,
+                tournament: category.tournament._id,
                 category: category._id,
                 players: [player1, player2],
                 ranking: player1!.ranking + player2!.ranking
@@ -81,8 +101,8 @@ export default function CreateTeams({ category, players }:CreateTeamsProps) {
 }
 
 type TeamCardProps = {
-    info:TeamTypeClient,
-    players:PlayerTypeClient[]
+    info:TeamLite,
+    players:PlayerTypePopulated[]
 }
 
 function TeamCard({ info }:TeamCardProps) {
@@ -97,7 +117,7 @@ function TeamCard({ info }:TeamCardProps) {
 
 interface TeamsLite {
     category:string,
-    players:PlayerTypeClient[],
+    players:PlayerTypePopulated[],
     ranking:number
 };
 

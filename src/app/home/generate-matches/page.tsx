@@ -3,6 +3,8 @@ import { GenerateMatchesForm } from "./Form";
 import NumbersOnly from "./NumbersOnly";
 import AboutClient from "./AboutClient";
 import Link from "next/link";
+import { PlayerTypePopulated } from "@/lib/types";
+import { Types } from "mongoose";
 
 export default function GenerateMatches() {
     return (
@@ -20,14 +22,29 @@ export default function GenerateMatches() {
     )
 }
 
+const generatePlayer = (i: number): PlayerTypePopulated => {
+    return {
+        _id: i.toString(),
+        tournament: new Types.ObjectId(),
+        user: {
+            firstName: i.toString(),
+            lastName: "",
+            fullname: i.toString()
+        },
+        male: true,
+        categories: [],
+        seeded: false,
+        ranking: i
+    }
+}
+
 function About() {
-    const players = ((n:number):string[] => {
-        const result:string[] = [];
-        for (let i = 1; i <= n; i++) {
-            result.push("Player " + i.toString());
-        }
-        return result;
-    })(8);
+    const players: PlayerTypePopulated[] = [];
+    for (let i = 1; i <= 8; i++) {
+        players.push(generatePlayer(i));
+
+    }
+    
 
     const matches = generateMatches(players);
     
