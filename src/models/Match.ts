@@ -35,6 +35,7 @@ const Match = new Schema({
 });
 
 Match.virtual("deadline").get(function() {
+    if (!this.date) return null;
   	return DateTime.fromJSDate(this.date).toLocaleString(DateTime.DATE_MED);
 });
 
