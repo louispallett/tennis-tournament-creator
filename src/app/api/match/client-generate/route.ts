@@ -1,23 +1,49 @@
 import { connectToDB } from "@/lib/db";
 import { generateMatches } from "@/lib/generateMatches";
 import HttpError from "@/lib/HttpError";
+import { PlayerTypePopulated } from "@/lib/types";
+import { Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+
+/* --- client-generate-POST ---
+ * Request to generate players from home/genereate-matches.
+ *
+ * This does not require sign-up and uses an array of player objects only.
+ * 
+ * It makes a direct call to generateMatches()
+ */ 
+
+const generatePlayer = (name: string, rank: number): PlayerTypePopulated => {
+    return {
+        _id: rank.toString(),
+        tournament: new Types.ObjectId(),
+        user: {
+            firstName: name,
+            lastName: "",
+            fullname: name
+        },
+        male: true,
+        categories: [],
+        seeded: false,
+        ranking: rank
+    }
+}
 
 const PostValidation = z.object({
     players: z.array(
         z.object({
-        name: z.string().trim().min(1, "Name is required").max(200),
-        rank: z.number().int().positive("Rank must be a positive number"),
+            name: z.string().trim().min(1, "Name is required").max(200),
+            rank: z.number().int().positive("Rank must be a positive number"),
         })
     ),
-    }).transform((data) => {
-    const sortedPlayers = [...data.players].sort((a, b) => a.rank - b.rank);
-    const playerNames = sortedPlayers.map((p) => p.name.trim());
-    return { players: playerNames };
+    })
+    .transform((data) => {
+    const players = [...data.players].sort((a, b) => a.rank - b.rank);
+    return { players };
+    // const playerNames = sortedPlayers.map((p) => p.name.trim());
+    // return { players: playerNames };
 });
-
-
 
 export async function POST(req:NextRequest) {
     try {
@@ -35,7 +61,11 @@ export async function POST(req:NextRequest) {
 
         const { players } = parsed.data;
         const numOfPlayers = players.length;
-        const matches = generateMatches(players);
+        const playersPopulated = [];
+        for (const player of players) {
+           playersPopulated.push(generatePlayer(player.name, player.rank)); 
+        }
+        const matches = generateMatches(playersPopulated);
 
         // The total number of matches must equal the number of players - 1. This is a fail-safe in case it doesn't.
         if (matches.length != numOfPlayers - 1) {

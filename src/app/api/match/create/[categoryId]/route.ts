@@ -1,29 +1,55 @@
 import objectIdSchema from "@/app/api/objectIdSchema";
 import { connectToDB } from "@/lib/db";
 import HttpError from "@/lib/HttpError";
+import { convertToMatch } from "@/lib/matches";
+import { MatchType } from "@/lib/types";
 import Category from "@/models/Category";
 import Match from "@/models/Match";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 //? Having both user and players as optional allows us to use this for both teams and players (doubles and singles)
-const ParticipantValidation = z.object({
-    _id: z.string().trim(),
-    user: z.object({
+const PlayerParticipantValidation = z.object({
+  _id: z.string().trim(),
+  tournament: objectIdSchema,
+  user: z.object({
+    _id: objectIdSchema,
+    firstName: z.string().trim().max(50),
+    lastName: z.string().trim().max(50),
+  }),
+  categories: z.array(objectIdSchema),
+  male: z.boolean(),
+  seeded: z.boolean(),
+  ranking: z.number(),
+});
+
+const TeamParticipantValidation = z.object({
+  _id: z.string().trim(),
+  tournament: objectIdSchema,
+  category: objectIdSchema,
+  players: z.tuple([
+    z.object({
+      user: z.object({
         firstName: z.string().trim().max(50),
         lastName: z.string().trim().max(50),
-    }).optional(),
-    players: z.array(z.object({
-        user: z.object({
-            firstName: z.string().trim().max(50),
-            lastName: z.string().trim().max(50),
-        })
-    })).optional()
-})
+      }),
+    }),
+    z.object({
+      user: z.object({
+        firstName: z.string().trim().max(50),
+        lastName: z.string().trim().max(50),
+      }),
+    }),
+  ]),
+  ranking: z.number(),
+});
 
 const MatchValidation = z.object({
     _id: objectIdSchema,
-    participants: z.array(ParticipantValidation),
+    participants: z.union([
+        z.array(PlayerParticipantValidation),
+        z.array(TeamParticipantValidation),
+    ]),
     tournamentRoundText: z.string().trim().max(20),
     nextMatchId: objectIdSchema.nullable(),
     qualifyingMatch: z.boolean(),
@@ -57,33 +83,40 @@ export async function POST(req:NextRequest, { params }: { params: { categoryId:s
 
         const categoryInfo = await Category.findById(categoryIdSafe);
 
-        for (let match of matches) {
-            match.participants = match.participants.map((participant) => {
-                const newParticipant = {
-                    participantId: "",
-                    participantModel: "",
-                    name: ""
-                };
-                if (categoryInfo.doubles) {
-                    newParticipant.participantId = participant._id,
-                    newParticipant.participantModel = "Team",
-                    newParticipant.name = `${participant.players![0].user.firstName} ${participant.players![0].user.lastName} and ${participant.players![1].user.firstName} ${participant.players![1].user.lastName}`
-                } else {
-                    newParticipant.participantId = participant._id,
-                    newParticipant.participantModel = "Player",
-                    newParticipant.name = `${participant.user!.firstName} ${participant.user!.lastName}`
-                }
-                return newParticipant;
-            });
+        const matchesFinal:MatchType[] = [];
+
+        for (const match of matches) {
+            const participantsPopulated = [];
+            for (const participant of match.participants) {
+                participantsPopulated.push({
+                    participantId: participant._id,
+                    participantModel: categoryInfo.doubles ? "Team" : "Player",
+                    resultText: "",
+                    isWinner: false,
+                    status: "",
+                    name: categoryInfo.doubes 
+                        ? `${participant.players ? participant.players[0].user.firstName : ""}
+                         ${participant.players ? participant.players[0].user.lastName : ""}
+                         and 
+                         ${participant.players ? participant.players[1].user.firstName : ""}
+                         ${participant.players ? participant.players[1].user.lastName : ""}` 
+                        : `${participant.user ? participant.user.firstName : ""} ${participant.user ? participant.user.lastName : ""}`,
+                });
+            }
+
+            matchesFinal.push(convertToMatch(
+                match,
+                categoryInfo.tournament,
+                categoryInfo._id,
+                participantsPopulated,
+                "SCHEDULED",
+                dates[Number(match.tournamentRoundText)],
+                0
+            ));
         }
 
         const savedMatches = await Promise.all(matches.map(async (match) => {
-            const newMatch = new Match({
-                ...match,
-                tournament: categoryInfo.tournament,
-                category: categoryIdSafe,
-                date: dates[Number(match.tournamentRoundText)]
-            });
+            const newMatch = new Match(match);
             return newMatch.save();
         }));
 

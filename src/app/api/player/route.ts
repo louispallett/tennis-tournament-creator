@@ -71,7 +71,7 @@ export async function POST(req:NextRequest) {
             }, { status: 400 });
         }
 
-        const { tournamentId, gender, categories, seeded } = parsed.data;
+        const { tournamentId, gender, categories } = parsed.data;
 
         const tournament = await Tournament.findById(tournamentId);
         if (!tournament) throw new Error();

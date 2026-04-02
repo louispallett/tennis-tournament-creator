@@ -53,7 +53,7 @@ export async function PUT(req:NextRequest, { params }: { params: { id:string }})
         if (nameChange) {
             console.log("Name Change to matches");
             const players = await getAllPlayersByUser(userId);
-            const teams:TeamType[]  = [];
+            const teams  = [];
             for (const player of players) {
                 const playerTeams = await getUserTeams(player._id);
                 teams.push(...playerTeams);

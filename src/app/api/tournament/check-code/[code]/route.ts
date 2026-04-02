@@ -1,5 +1,6 @@
 import { connectToDB } from "@/lib/db";
 import HttpError from "@/lib/HttpError";
+import { TournamentTypePopulated } from "@/lib/types";
 import Tournament from "@/models/Tournament";
 import User from "@/models/User";
 import { NextRequest, NextResponse } from "next/server";
@@ -16,12 +17,13 @@ export async function GET(req:NextRequest, { params }: { params: { code:string }
 
         const codeSafe = parsed.data;
 
-        const tournament = await Tournament.findOne({ code: codeSafe })
+        const tournament:TournamentTypePopulated = await Tournament.findOne({ code: codeSafe })
             .populate({ 
                 path: "host",
-                select: "-_id firstName lastName",
+                select: "firstName lastName -_id",
                 model: User
-            })
+            });
+
         if (!tournament) {
             throw new HttpError("Incorrect tournament code", 400);
         }
