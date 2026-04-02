@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 
 type BaseType = {
-    _id: string
+    _id: Types.ObjectId | string
 };
 
 export interface UserType extends BaseType {
@@ -17,7 +17,7 @@ export interface UserType extends BaseType {
 export interface TournamentType extends BaseType {
     name: string,
     stage: string,
-    host: Types.ObjectId,
+    host: Types.ObjectId | string,
     code: string,
     startDate: Date,
     showMobile: boolean
@@ -28,7 +28,7 @@ export interface TournamentTypePopulated extends Omit<TournamentType, "host"> {
 };
 
 export interface CategoryType extends BaseType {
-    tournament: Types.ObjectId,
+    tournament: Types.ObjectId | string,
     name: string,
     code: string,
     locked: boolean,
@@ -40,22 +40,22 @@ export interface CategoryTypePopulated extends Omit<CategoryType, "tournament"> 
 };
 
 export interface PlayerType extends BaseType {
-    tournament: Types.ObjectId,
-    user: Types.ObjectId,
+    tournament: Types.ObjectId | string,
+    user: Types.ObjectId | string,
     male: boolean,
-    categories: Types.ObjectId[],
+    categories: Types.ObjectId[] | string[],
     seeded: boolean,
     ranking: number,
 };
 
 export interface PlayerTypePopulated extends Omit<PlayerType, "user"> {
-    user: Pick<UserType, "firstName" | "lastName" | "fullname">,
+    user: Pick<UserType, "firstName" | "lastName">,
 };
 
 export interface TeamType extends BaseType {
-    tournament: Types.ObjectId,
-    category: Types.ObjectId,
-    players: [Types.ObjectId, Types.ObjectId],
+    tournament: Types.ObjectId | string,
+    category: Types.ObjectId | string,
+    players: Types.ObjectId[] | string[],
     ranking: number,
 };
 
@@ -64,7 +64,7 @@ export interface TeamTypePopulated extends Omit<TeamType, "players"> {
 };
 
 interface ParticipantType {
-    participantId: Types.ObjectId,
+    participantId: Types.ObjectId | string,
     participantModel: string,
     resultText: string,
     isWinner: boolean,
@@ -74,17 +74,17 @@ interface ParticipantType {
 
 export interface MatchTypeLite extends BaseType {
     nextMatchId: string | null,
-    previousMatchId?: string[],
+    previousMatchId?: Types.ObjectId[] | string[],
     tournamentRoundText: string,
     participants: PlayerTypePopulated[] | TeamTypePopulated[],
     qualifyingMatch: boolean,
 }
 
 export interface MatchType extends Omit<MatchTypeLite, "participants" | "nextMatchId" | "previousMatchId" > {
-    tournament: Types.ObjectId,
-    category: Types.ObjectId,
-    nextMatchId: Types.ObjectId,
-    previousMatchId?: Types.ObjectId[],
+    tournament: Types.ObjectId | string,
+    category: Types.ObjectId | string,
+    nextMatchId: Types.ObjectId | string | null,
+    previousMatchId?: Types.ObjectId[] | string[],
     participants: ParticipantType[],
     state: string,
     date: Date,
