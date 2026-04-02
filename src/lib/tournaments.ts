@@ -1,5 +1,5 @@
 import Tournament from "@/models/Tournament";
-import { TournamentType, TournamentTypeAdvanced } from "./types";
+import { TournamentType } from "./types";
 import User from "@/models/User";
 import { DateTime } from "luxon";
 import { connectToDB } from "./db";

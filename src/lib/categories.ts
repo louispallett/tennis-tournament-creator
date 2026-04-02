@@ -1,12 +1,27 @@
 import Category from "@/models/Category";
-import { CategoryType } from "./types";
+import { CategoryType, CategoryTypePopulated } from "./types";
 import { connectToDB } from "./db";
 import HttpError from "./HttpError";
 import { Types } from "mongoose";
 
-export async function getCategoryInfo(categoryId:string):Promise<CategoryType> {
+export async function getCategory(categoryId:string):Promise<CategoryType> {
     await connectToDB();
     const category = await Category.findById(categoryId);
+
+    if (!category) {
+        throw new HttpError("Category not found", 404);
+    }
+
+    return category;
+}
+
+export async function getCategoryPopulated(categoryId: string): Promise<CategoryTypePopulated> {
+    await connectToDB();
+
+    const category = await Category.findById(categoryId)
+        .populate({ path: "tournament", select: "name stage host code startDate showMobile",
+            populate: { path: "host", select: "firstName lastName"}
+        });
 
     if (!category) {
         throw new HttpError("Category not found", 404);

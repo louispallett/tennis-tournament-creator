@@ -1,7 +1,8 @@
 import Match from "@/models/Match";
 import { connectToDB } from "./db";
-import { MatchType, PlayerType, TeamType } from "./types";
+import { MatchType, MatchTypeLite, ParticipantType, PlayerType, TeamType } from "./types";
 import Category from "@/models/Category";
+import { Types } from "mongoose";
 
 export async function getMatchesByTournament(tournamentId:string):Promise<MatchType[]> {
     await connectToDB();
@@ -54,4 +55,24 @@ export async function getAllUserMatches(players:PlayerType[], userTeams:TeamType
         model: Category
     });
     return matches;
+}
+
+export function convertToMatch(
+    match: MatchTypeLite, 
+    tournament: Types.ObjectId, 
+    category: Types.ObjectId,
+    participants: ParticipantType[],
+    state: string,
+    date: Date,
+    updateNumber: number
+): MatchType {
+    return ({
+        ...match,
+        tournament,
+        category,
+        participants,
+        state,
+        date,
+        updateNumber,
+    });
 }
