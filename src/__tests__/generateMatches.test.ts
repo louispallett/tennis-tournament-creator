@@ -1,15 +1,13 @@
 import { generateMatches } from "@/lib/generateMatches";
 import { PlayerTypePopulated } from "@/lib/types";
-import { Types } from "mongoose";
 
 const generatePlayer = (i: number): PlayerTypePopulated => {
     return {
         _id: i.toString(),
-        tournament: new Types.ObjectId(),
+        tournament: "",
         user: {
             firstName: i.toString(),
             lastName: "",
-            fullname: i.toString()
         },
         male: true,
         categories: [],
