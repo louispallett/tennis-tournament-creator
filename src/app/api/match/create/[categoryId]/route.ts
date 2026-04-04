@@ -10,38 +10,28 @@ import { z } from "zod";
 
 //? Having both user and players as optional allows us to use this for both teams and players (doubles and singles)
 const PlayerParticipantValidation = z.object({
-  _id: z.string().trim(),
-  tournament: objectIdSchema,
-  user: z.object({
     _id: objectIdSchema,
-    firstName: z.string().trim().max(50),
-    lastName: z.string().trim().max(50),
-  }),
-  categories: z.array(objectIdSchema),
-  male: z.boolean(),
-  seeded: z.boolean(),
-  ranking: z.number(),
+    tournament: objectIdSchema,
+    user: z.object({
+        _id: objectIdSchema,
+        firstName: z.string().trim().max(50),
+        lastName: z.string().trim().max(50),
+    }),
+    male: z.boolean(),
+    categories: z.array(objectIdSchema),
+    seeded: z.boolean(),
+    ranking: z.number(),
 });
 
 const TeamParticipantValidation = z.object({
-  _id: z.string().trim(),
-  tournament: objectIdSchema,
-  category: objectIdSchema,
-  players: z.tuple([
-    z.object({
-      user: z.object({
-        firstName: z.string().trim().max(50),
-        lastName: z.string().trim().max(50),
-      }),
-    }),
-    z.object({
-      user: z.object({
-        firstName: z.string().trim().max(50),
-        lastName: z.string().trim().max(50),
-      }),
-    }),
-  ]),
-  ranking: z.number(),
+    _id: objectIdSchema,
+    tournament: objectIdSchema,
+    category: objectIdSchema,
+    players: z.tuple([
+        PlayerParticipantValidation,
+        PlayerParticipantValidation,
+    ]),
+    ranking: z.number(),
 });
 
 const MatchValidation = z.object({
@@ -94,13 +84,24 @@ export async function POST(req:NextRequest, { params }: { params: { categoryId:s
                     resultText: "",
                     isWinner: false,
                     status: "",
-                    name: categoryInfo.doubes 
-                        ? `${participant.players ? participant.players[0].user.firstName : ""}
-                         ${participant.players ? participant.players[0].user.lastName : ""}
+                    /*
+                     * --- NOTE ON TYPE FIX ---
+                     *  The fix below fixes the type issue when assigning the correct name to participants. The problem was that our 
+                     *  validation above allows either a Team or a Player and we have to merge this information into one object of the 
+                     *  same type. 
+                     *
+                     *  "players" in participant explicitly checks for the existance of players in our validation, hence this fixes our error.
+                     *
+                     *  TODO: A cleaner fix would be to introduce participantModel earlier in the creation of matches. We can then simply run the conditional:
+                     *
+                     *  participantModel === "Team" ? ... : ...
+                     *
+                    */
+                    name: "players" in participant
+                        ? `${participant.players[0].user.firstName} ${participant.players[0].user.lastName}
                          and 
-                         ${participant.players ? participant.players[1].user.firstName : ""}
-                         ${participant.players ? participant.players[1].user.lastName : ""}` 
-                        : `${participant.user ? participant.user.firstName : ""} ${participant.user ? participant.user.lastName : ""}`,
+                         ${participant.players[1].user.firstName} ${participant.players[1].user.lastName}` 
+                        : `${participant.user.firstName} ${participant.user.lastName}`,
                 });
             }
 
