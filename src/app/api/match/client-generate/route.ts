@@ -2,7 +2,6 @@ import { connectToDB } from "@/lib/db";
 import { generateMatches } from "@/lib/generateMatches";
 import HttpError from "@/lib/HttpError";
 import { PlayerTypePopulated } from "@/lib/types";
-import { Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -17,11 +16,10 @@ import { z } from "zod";
 const generatePlayer = (name: string, rank: number): PlayerTypePopulated => {
     return {
         _id: rank.toString(),
-        tournament: new Types.ObjectId(),
+        tournament: "",
         user: {
             firstName: name,
             lastName: "",
-            fullname: name
         },
         male: true,
         categories: [],
@@ -41,8 +39,6 @@ const PostValidation = z.object({
     .transform((data) => {
     const players = [...data.players].sort((a, b) => a.rank - b.rank);
     return { players };
-    // const playerNames = sortedPlayers.map((p) => p.name.trim());
-    // return { players: playerNames };
 });
 
 export async function POST(req:NextRequest) {
