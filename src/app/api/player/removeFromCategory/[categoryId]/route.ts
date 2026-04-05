@@ -10,7 +10,7 @@ const PutValidation = z.object({
 
 export async function PUT(
     req:Request,
-    { params }: { params: { categoryId:string }}
+    { params }: { params: { categoryIdParam:string }}
 ) {
     try {
         const body = await req.json();
