@@ -1,7 +1,8 @@
 import { connectToDB } from "@/lib/db";
 import { generateMatches } from "@/lib/generateMatches";
 import HttpError from "@/lib/HttpError";
-import { PlayerTypePopulated } from "@/lib/types";
+import { convertToMatch } from "@/lib/matches";
+import { MatchType, PlayerTypePopulated } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -11,7 +12,7 @@ import { z } from "zod";
  * This does not require sign-up and uses an array of player objects only.
  * 
  * It makes a direct call to generateMatches()
- */ 
+*/ 
 
 const generatePlayer = (name: string, rank: number): PlayerTypePopulated => {
     return {
@@ -70,18 +71,38 @@ export async function POST(req:NextRequest) {
             throw new HttpError(error, 500);
         }
 
-        for (let match of matches) {
-            match.participants = match.participants.map((participant) => {
-                const newParticipant = {
-                    name: participant,
-                    resultText: ""
-                };
-                
-                return newParticipant;
-            });
+        const matchesFinal:MatchType[] = [];
+
+        for (const match of matches) {
+            const participantsPopulated = [];
+            for (const participant of match.participants) {
+                participantsPopulated.push({
+                    participantId: participant._id,
+                    participantModel: "Player",
+                    resultText: "",
+                    isWinner: false,
+                    status: "",
+                    name: "players" in participant
+                        ? `${participant.players[0].user.firstName} ${participant.players[0].user.lastName}
+                         and 
+                         ${participant.players[1].user.firstName} ${participant.players[1].user.lastName}` 
+                        : `${participant.user.firstName} ${participant.user.lastName}`,
+                });
+            }
+
+            matchesFinal.push(convertToMatch(
+                match,
+                "",
+                "",
+                participantsPopulated,
+                "SCHEDULED",
+                new Date(),
+                0
+            ));
+
         }
 
-        return NextResponse.json({ matches });
+        return NextResponse.json({ matchesFinal });
     } catch (err:any) {
         console.error(err);
         return NextResponse.json(

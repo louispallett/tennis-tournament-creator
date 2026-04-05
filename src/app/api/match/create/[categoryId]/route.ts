@@ -116,7 +116,7 @@ export async function POST(req:NextRequest, { params }: { params: { categoryId:s
             ));
         }
 
-        const savedMatches = await Promise.all(matches.map(async (match) => {
+        const savedMatches = await Promise.all(matchesFinal.map(async (match) => {
             const newMatch = new Match(match);
             return newMatch.save();
         }));
