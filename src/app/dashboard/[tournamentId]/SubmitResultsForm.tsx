@@ -6,15 +6,15 @@ import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { ChevronDownIcon } from "@heroicons/react/16/solid";
 
-type Props = { MatchType };
+type Props = { info: MatchType };
 
 export default function SubmitResultsForm({ info }:Props) {
     const form = useForm();
-    const { register, control, handleSubmit, formState, watch, reset, setValue, trigger } = form;
+    const { handleSubmit, formState } = form;
     const { errors } = formState;
-    const [error, setError] = useState<string>("");
+    const [error, setError] = useState<string | null>(null);
     const [isPending, setIsPending] = useState<boolean>(false);
-    const [success, setSuccess] = useState(false);
+    const [success, setSuccess] = useState<boolean>(false);
     const [checkedState, setCheckedState] = useState({ walkover: false });
 
     const player1Id = info.participants[0]._id;
@@ -22,6 +22,9 @@ export default function SubmitResultsForm({ info }:Props) {
 
     const [winner, setwinner] = useState("");
 
+    // FIXME: Note, 'value' does not exist on event.target. See answer here:
+    //    https://stackoverflow.com/questions/42081549/typescript-react-event-types
+    // TLDR: we need to cast value as a HTMLInputElement.
     const handleWinnerChange = (event:Event) => setwinner(event.target.value);
 
     const [scores, setScores] = useState<{ [key: string]: string[] }>({});
@@ -55,6 +58,7 @@ export default function SubmitResultsForm({ info }:Props) {
     };
 
     const handleCheckboxChange = (option:string) => {
+        // FIXME: Error here is because `prevState` has not been given a type in (), so add this.
         setCheckedState((prevState) => ({
             ...prevState,
             [option]: !prevState[option],

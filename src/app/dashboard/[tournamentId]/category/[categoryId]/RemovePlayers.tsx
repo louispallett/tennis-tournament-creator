@@ -1,11 +1,11 @@
 "use client"
 
-import { PlayerTypeClient } from "@/lib/types"
-import axios from "axios"
+import { PlayerTypePopulated } from "@/lib/types"
+import axios, { AxiosError } from "axios"
 import { useState } from "react"
 
 type EditPlayersProps = {
-    players:PlayerTypeClient[],
+    players:PlayerTypePopulated[],
     categoryId:string
 }
 
@@ -22,9 +22,9 @@ export default function RemovePlayers({ players, categoryId }:EditPlayersProps) 
 }
 
 function RemovePlayersInner({ players, categoryId }:EditPlayersProps) {
-    const [deletedPlayers, setDeletedPlayers] = useState([]);
-    const [isPending, setIsPending] = useState(false);
-    const [serverError, setServerError] = useState(null);
+    const [deletedPlayers, setDeletedPlayers] = useState<PlayerTypePopulated[]>([]);
+    const [isPending, setIsPending] = useState<boolean>(false);
+    const [serverError, setServerError] = useState<AxiosError | null>(null);
 
     const onSubmit = () => {
         setIsPending(true);
@@ -54,19 +54,19 @@ function RemovePlayersInner({ players, categoryId }:EditPlayersProps) {
 }
 
 type PlayerCardProps = { 
-    player:PlayerTypeClient,
-    deletedPlayers:PlayerTypeClient[],
-    setDeletedPlayers:any
+    player:PlayerTypePopulated,
+    deletedPlayers:PlayerTypePopulated[],
+    setDeletedPlayers: (v: PlayerTypePopulated[]) => void
 }
 
 function PlayerCard({ player, deletedPlayers, setDeletedPlayers }:PlayerCardProps) {
-    const isDeleted = deletedPlayers.includes(player._id);
+    const isDeleted = deletedPlayers.includes(player);
 
     const handleXChange = () => {
         if (isDeleted) {
-            setDeletedPlayers(deletedPlayers.filter(id => id !== player._id));
+            setDeletedPlayers(deletedPlayers.filter((_player:PlayerTypePopulated) => _player !== player));
         } else {
-            setDeletedPlayers([...deletedPlayers, player._id]);
+            setDeletedPlayers([...deletedPlayers, player]);
         }
     }
 

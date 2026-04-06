@@ -1,11 +1,11 @@
 "use client"
 
-import { PlayerType } from "@/lib/types"
+import { PlayerTypePopulated } from "@/lib/types"
 import axios from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
-type SeedingPlayersProps = { players:PlayerType[] }
+type SeedingPlayersProps = { players:PlayerTypePopulated[] }
 
 export default function SeedingPlayers({ players }:SeedingPlayersProps) {
     const [isOpen, setIsOpen] = useState(false);
@@ -41,14 +41,14 @@ export default function SeedingPlayers({ players }:SeedingPlayersProps) {
 }
 
 type SeedPlayersFormProps = { 
-    players:PlayerType[],
+    players:PlayerTypePopulated[],
     setIsOpen:any
 }
 
 function SeedPlayersForm({ players, setIsOpen }:SeedPlayersFormProps) {
     const [error, setError] = useState(null);
     const form = useForm();
-    const { register, handleSubmit, formState, watch, reset, setValue, trigger } = form;
+    const { register, handleSubmit, formState } = form;
     const { errors } = formState;
     const [isPending, setIsPending] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -134,7 +134,7 @@ function SeedPlayersForm({ players, setIsOpen }:SeedPlayersFormProps) {
 }
 
 type PlayerSeedCardProps = {
-    data:PlayerType,
+    data:PlayerTypePopulated,
     register:any,
     reg:string
 }
@@ -143,7 +143,7 @@ type PlayerSeedCardProps = {
 function PlayerSeedCard({ data, register, reg }:PlayerSeedCardProps) {
     return (
         <div className="standard-container p-2! flex flex-1 justify-between shadow-none! items-center gap-2.5">
-            <p className="text-left">{data.user["name-long"]}</p>
+            <p className="text-left">{data.user.firstName} {data.user.lastName}</p>
             <input type="checkbox"
                 id={reg}
                 defaultChecked={data.seeded}

@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import CloseRegistration from "./CloseRegistration";
-import { CategoryType, MatchType, TeamType, TournamentTypeAdvanced } from "@/lib/types";
+import { CategoryType, MatchType, TeamType, TournamentTypePopulated } from "@/lib/types";
 import CloseDraw from "./CloseDraw";
 import ReOpenRegistration from "./ReOpenRegistration";
 import axios from "axios";
 
 type TournamentStageProps = {
-    tournament:TournamentTypeAdvanced
+    tournament:TournamentTypePopulated
     categories:CategoryType[],
     matches:MatchType[],
     teams:TeamType[]

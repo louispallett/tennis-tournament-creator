@@ -1,17 +1,17 @@
 "use client"
 
-import { PlayerType } from "@/lib/types";
+import { PlayerTypePopulated } from "@/lib/types";
 import axios from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
-type RankPlayersProps = { players:PlayerType[] }
+type RankPlayersProps = { players:PlayerTypePopulated[] }
 
 export default function RankPlayers({ players }:RankPlayersProps) {
-    const [isOpen, setIsOpen] = useState(false);
-    const [error, setError] = useState(null);
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
     const form = useForm();
-    const { register, handleSubmit, formState, watch, reset, setValue, trigger } = form;
+    const { register, handleSubmit, formState } = form;
     const { errors } = formState;
     const [isPending, setIsPending] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -146,7 +146,7 @@ export default function RankPlayers({ players }:RankPlayersProps) {
 }
 
 type PlayerRankCardProps = {
-    data:PlayerType,
+    data:PlayerTypePopulated,
     register:any,
     reg:string
 }
@@ -154,7 +154,7 @@ type PlayerRankCardProps = {
 function PlayerRankCard({ data, register, reg }:PlayerRankCardProps) {
     return (
         <div className="standard-container p-2! flex flex-1 justify-between shadow-none! items-center gap-2.5">
-            <p className="text-left">{data.user["name-long"]}</p>
+            <p className="text-left">{data.user.firstName} {data.user.lastName}</p>
             <input type="number" className="form-input p-2! max-w-24 shadow-none!"
                 required
                 id={reg}

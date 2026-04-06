@@ -1,11 +1,11 @@
-import { CategoryType, MatchType, PlayerType, TeamType, TournamentType } from "@/lib/types";
+import { CategoryType, MatchType, PlayerType, TeamType, TournamentTypePopulated } from "@/lib/types";
 import Link from "next/link";
 import TournamentStage from "./TournamentStage";
 import RankPlayers from "./RankPlayers";
 import SeedingPlayers from "./SeedingPlayers";
 
 type HostSectionProps = {
-    tournament:TournamentType,
+    tournament:TournamentTypePopulated,
     categories:CategoryType[],
     matches:MatchType[]
     players:PlayerType[],

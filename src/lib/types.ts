@@ -61,7 +61,7 @@ export interface TeamTypePopulated extends Omit<TeamType, "players"> {
    players: [PlayerTypePopulated, PlayerTypePopulated],
 };
 
-export interface ParticipantType {
+export interface ParticipantType extends BaseType {
     participantId: string,
     participantModel: string,
     resultText: string,

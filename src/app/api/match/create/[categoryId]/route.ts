@@ -79,6 +79,7 @@ export async function POST(req:NextRequest, { params }: { params: { categoryId:s
             const participantsPopulated = [];
             for (const participant of match.participants) {
                 participantsPopulated.push({
+                    _id: participant._id,
                     participantId: participant._id,
                     participantModel: categoryInfo.doubles ? "Team" : "Player",
                     resultText: "",

@@ -77,6 +77,7 @@ export async function POST(req:NextRequest) {
             const participantsPopulated = [];
             for (const participant of match.participants) {
                 participantsPopulated.push({
+                    _id: participant._id,
                     participantId: participant._id,
                     participantModel: "Player",
                     resultText: "",
