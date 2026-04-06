@@ -50,7 +50,7 @@ export default function UpdatePasswordForm({ userId }:Props) {
                             className="form-input-no-shadow"
                         />
                         <span>
-                            <p className="text-red-600 font-bold mt-1.5 text-xs">{errors.currentPassword?.message}</p>
+                            <p className="text-red-600 font-bold mt-1.5 text-xs">{String(errors.currentPassword?.message)}</p>
                         </span>
                     </div>
                     <div>
@@ -76,7 +76,7 @@ export default function UpdatePasswordForm({ userId }:Props) {
                             )}
                         </div>
                         <span>
-                            <p className="text-red-600 font-bold mt-1.5 text-xs text-right">{errors.newPassword?.message}</p>
+                            <p className="text-red-600 font-bold mt-1.5 text-xs text-right">{String(errors.newPassword?.message)}</p>
                         </span>
                     </div>
                 </div>

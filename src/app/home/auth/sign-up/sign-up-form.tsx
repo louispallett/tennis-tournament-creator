@@ -55,7 +55,7 @@ export default function SignUpForm({ countryCodesArray }:SignUpFormProps) {
                             })}
                         />
                         <span>
-                            <p className="text-red-600 font-bold mt-1.5 text-xs">{errors.firstName?.message}</p>
+                            <p className="text-red-600 font-bold mt-1.5 text-xs">{String(errors.firstName?.message)}</p>
                         </span>
                     </div>
                     <div>
@@ -69,7 +69,7 @@ export default function SignUpForm({ countryCodesArray }:SignUpFormProps) {
                             })}
                         />
                         <span>
-                            <p className="text-red-600 font-bold mt-1.5 text-xs text-right">{errors.lastName?.message}</p>
+                            <p className="text-red-600 font-bold mt-1.5 text-xs text-right">{String(errors.lastName?.message)}</p>
                         </span>
                     </div>
                 </div>
@@ -85,7 +85,7 @@ export default function SignUpForm({ countryCodesArray }:SignUpFormProps) {
                             })}
                         />
                         <span>
-                            <p className="text-red-600 font-bold mt-1.5 text-xs">{errors.email?.message}</p>
+                            <p className="text-red-600 font-bold mt-1.5 text-xs">{String(errors.email?.message)}</p>
                         </span>
                     </div>
                     <div>
@@ -110,7 +110,7 @@ export default function SignUpForm({ countryCodesArray }:SignUpFormProps) {
                             />
                         </div>
                         <span>
-                            <p className="text-red-600 font-bold mt-1.5 text-xs text-right">{errors.mobile?.message}</p>
+                            <p className="text-red-600 font-bold mt-1.5 text-xs text-right">{String(errors.mobile?.message)}</p>
                         </span>
                     </div>
                 </div>
@@ -132,7 +132,7 @@ export default function SignUpForm({ countryCodesArray }:SignUpFormProps) {
                                 className="form-input"
                             />
                             <span>
-                                <p className="text-red-600 font-bold mt-1.5 text-xs">{errors.password?.message}</p>
+                                <p className="text-red-600 font-bold mt-1.5 text-xs">{String(errors.password?.message)}</p>
                             </span>
                         </div>
                     </div>
@@ -158,7 +158,7 @@ export default function SignUpForm({ countryCodesArray }:SignUpFormProps) {
                             )}
                         </div>
                         <span>
-                            <p className="text-red-600 font-bold mt-1.5 text-xs text-right">{errors.confPassword?.message}</p>
+                            <p className="text-red-600 font-bold mt-1.5 text-xs text-right">{String(errors.confPassword?.message)}</p>
                         </span>
                     </div>
                 </div>

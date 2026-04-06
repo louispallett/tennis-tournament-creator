@@ -1,16 +1,16 @@
 "use client"
 
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 export default function ForgotPasswordForm() {
     const form = useForm();
-    const { register, control, handleSubmit, formState, watch, reset, setValue, trigger } = form;
+    const { register, handleSubmit, formState } = form;
     const { errors } = formState;
     const [isPending, setIsPending] = useState<boolean>(false);
     const [success, setSuccess] = useState<boolean>(false);
-    const [error, setError] = useState<string>("");
+    const [error, setError] = useState<AxiosError | null>(null);
 
     const onSubmit = async (data:any) => {
         setIsPending(true)
@@ -40,7 +40,7 @@ export default function ForgotPasswordForm() {
                     })}
                 />
                 <span>
-                    <p className="text-red-600 font-bold text-xs">{errors.email?.message}</p>
+                    <p className="text-red-600 font-bold text-xs">{String(errors.email?.message)}</p>
                 </span>
                 { success ? (
                     <div className="standard-container bg-indigo-600 text-slate-50">

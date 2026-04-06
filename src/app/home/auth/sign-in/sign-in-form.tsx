@@ -42,7 +42,7 @@ export default function SignIn() {
                             })}
                         />
                         <span>
-                            <p className="text-red-600 font-bold mt-1.5 text-xs">{errors.email?.message}</p>
+                            <p className="text-red-600 font-bold mt-1.5 text-xs">{String(errors.email?.message)}</p>
                         </span>
                     </div>
                     <div>
@@ -63,7 +63,7 @@ export default function SignIn() {
                             )}
                         </div>
                         <span>
-                            <p className="text-red-600 font-bold mt-1.5 text-xs">{errors.password?.message}</p>
+                            <p className="text-red-600 font-bold mt-1.5 text-xs">{String(errors.password?.message)}</p>
                         </span>
                     </div>
                 </div>

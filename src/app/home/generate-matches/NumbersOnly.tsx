@@ -89,7 +89,7 @@ export default function NumbersOnly() {
                     <button className="submit">Create</button>
                 </form>
                 <span>
-                    <p className="text-red-600 font-bold mt-1.5 text-xs">{errors.numOfPlayers?.message}</p>
+                    <p className="text-red-600 font-bold mt-1.5 text-xs">{String(errors.numOfPlayers?.message)}</p>
                 </span>
             </div>
             { isPending && (

@@ -54,7 +54,7 @@ export default function UpdatePersonalDetailsForm({ details, countryCodesArray }
                             })}
                         />
                         <span>
-                            <p className="text-red-600 font-bold mt-1.5 text-xs">{errors.firstName?.message}</p>
+                            <p className="text-red-600 font-bold mt-1.5 text-xs">{String(errors.firstName?.message)}</p>
                         </span>
                     </div>
                     <div>
@@ -69,7 +69,7 @@ export default function UpdatePersonalDetailsForm({ details, countryCodesArray }
                             })}
                         />
                         <span>
-                            <p className="text-red-600 font-bold mt-1.5 text-xs text-right">{errors.lastName?.message}</p>
+                            <p className="text-red-600 font-bold mt-1.5 text-xs text-right">{String(errors.lastName?.message)}</p>
                         </span>
                     </div>
                 </div>
@@ -86,7 +86,7 @@ export default function UpdatePersonalDetailsForm({ details, countryCodesArray }
                             })}
                         />
                         <span>
-                            <p className="text-red-600 font-bold mt-1.5 text-xs">{errors.email?.message}</p>
+                            <p className="text-red-600 font-bold mt-1.5 text-xs">{String(errors.email?.message)}</p>
                         </span>
                     </div>
                     <div>
@@ -112,7 +112,7 @@ export default function UpdatePersonalDetailsForm({ details, countryCodesArray }
                             />
                         </div>
                         <span>
-                            <p className="text-red-600 font-bold mt-1.5 text-xs text-right">{errors.mobile?.message}</p>
+                            <p className="text-red-600 font-bold mt-1.5 text-xs text-right">{String(errors.mobile?.message)}</p>
                         </span>
                     </div>
                 </div>
