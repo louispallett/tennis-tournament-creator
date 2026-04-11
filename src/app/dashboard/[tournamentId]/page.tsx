@@ -2,7 +2,7 @@ import { getMatchesByTournament, getUserMatches } from "@/lib/matches";
 import { getPlayerByUser, getPlayersByTournament } from "@/lib/players";
 import { getTeamsByTournament, getUserTeams } from "@/lib/teams";
 import { getTournamentById } from "@/lib/tournaments";
-import { CategoryType, MatchType, PlayerType, TeamType, TournamentType } from "@/lib/types";
+import { CategoryType, MatchType, PlayerType, TeamType, TeamTypePopulated, TournamentType, TournamentTypePopulated } from "@/lib/types";
 import { jwtVerify } from "jose";
 import { cookies } from "next/headers";
 // @ts-ignore - TournamentResults is a .jsx file with no type definitions
@@ -50,11 +50,8 @@ export default async function Tournament({ params }: { params: { tournamentId: s
     const player = await getPlayer(tournamentId, userId);
     // const playerCategories = await getPlayerCategories(player.categories);
 
-    let userTeams = [], userMatches = [];
-    if (player) {
-        userTeams = await getUserTeams(player._id);
-        userMatches = await getUserMatches(player._id, userTeams);
-    }
+    const userTeams = player ? await getUserTeams(player._id) : [];
+    const userMatches = player ? await getUserMatches(player._id, userTeams) : [];
     
     const isHost = tournament.host._id == userId;
     const matchesClient = JSON.parse(JSON.stringify(matches));
@@ -89,7 +86,7 @@ export default async function Tournament({ params }: { params: { tournamentId: s
 }
 
 type TournamentInfoProps = {
-    tournament: TournamentType,
+    tournament: TournamentTypePopulated,
     players: PlayerType[],
     matches: MatchType[],
 }
@@ -170,7 +167,7 @@ function UserTeams({ teams, stage }: UserTeamsProps) {
 }
 
 type TeamCardProps = {
-    info: TeamType
+    info: TeamTypePopulated
 }
 
 function TeamCard({ info }:TeamCardProps) {

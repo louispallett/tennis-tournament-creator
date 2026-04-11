@@ -4,7 +4,7 @@ import NumbersOnly from "./NumbersOnly";
 import AboutClient from "./AboutClient";
 import Link from "next/link";
 import { PlayerTypePopulated } from "@/lib/types";
-import { Types } from "mongoose";
+import { convertToMatch } from "@/lib/matches";
 
 export default function GenerateMatches() {
     return (
@@ -25,11 +25,10 @@ export default function GenerateMatches() {
 const generatePlayer = (i: number): PlayerTypePopulated => {
     return {
         _id: i.toString(),
-        tournament: new Types.ObjectId(),
+        tournament: "",
         user: {
             firstName: i.toString(),
             lastName: "",
-            fullname: i.toString()
         },
         male: true,
         categories: [],
@@ -45,24 +44,39 @@ function About() {
 
     }
     
-
     const matches = generateMatches(players);
+    const matchesFinal = [];
     
-    for (let match of matches) {
-        match.category = { name: "" };
-        match.id = match._id;
-        match.state = "SCHEDULED";
-        match.participants = match.participants.map((participant) => {
-            const newParticipant = {
-                name: participant,
-                resultText: ""
-            };
-            
-            return newParticipant;
-        });
+    for (const match of matches) {
+        const participantsPopulated = [];
+        for (const participant of match.participants) {
+            participantsPopulated.push({
+                _id: participant._id,
+                participantId: participant._id,
+                participantModel: "Player",
+                resultText: "",
+                isWinner: false,
+                status: "",
+                name: "players" in participant
+                    ? `${participant.players[0].user.firstName} ${participant.players[0].user.lastName}
+                     and 
+                     ${participant.players[1].user.firstName} ${participant.players[1].user.lastName}` 
+                    : `${participant.user.firstName} ${participant.user.lastName}`,
+            });
+        }
+
+        matchesFinal.push(convertToMatch(
+            match,
+            "",
+            "",
+            participantsPopulated,
+            "SCHEDULED",
+            new Date(),
+            0
+        ));
     }
     
-    const matchesClient = JSON.parse(JSON.stringify(matches));
+    const matchesClient = JSON.parse(JSON.stringify(matchesFinal));
 
     return (
         <AboutClient matches={matchesClient} />

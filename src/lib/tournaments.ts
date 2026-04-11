@@ -1,12 +1,12 @@
 import Tournament from "@/models/Tournament";
-import { TournamentType } from "./types";
+import { TournamentType, TournamentTypePopulated } from "./types";
 import User from "@/models/User";
 import { DateTime } from "luxon";
 import { connectToDB } from "./db";
 import Player from "@/models/Player";
 import HttpError from "./HttpError";
 
-export async function getTournamentById(tournamentId:string): Promise<TournamentType> {
+export async function getTournamentById(tournamentId:string): Promise<TournamentTypePopulated> {
     await connectToDB();
 
     const tournament = await Tournament.findById(tournamentId)

@@ -236,3 +236,11 @@ function StageFinished() {
         <p>This tournament is finished.</p>
     )
 }
+
+// Both below will have to be client components
+function DangerZone() {
+
+}
+function DeleteDialog() {
+    
+}
