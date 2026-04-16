@@ -6,7 +6,19 @@ import { connectToDB } from "./db";
 import Player from "@/models/Player";
 import HttpError from "./HttpError";
 
-export async function getTournamentById(tournamentId:string): Promise<TournamentTypePopulated> {
+export async function getTournamentById(tournamentId:string): Promise<TournamentType> {
+    await connectToDB();
+
+    const tournament = await Tournament.findById(tournamentId);
+
+    if (!tournament) {
+        throw new HttpError("Not found", 404);
+    }
+
+    return tournament;
+}
+
+export async function getPopulatedTournamentById(tournamentId:string): Promise<TournamentTypePopulated> {
     await connectToDB();
 
     const tournament = await Tournament.findById(tournamentId)

@@ -1,19 +1,17 @@
 "use client"
 
 import { generateMatches } from "@/lib/generateMatches";
-import { MatchType, MatchTypeLite, PlayerTypeClient, PlayerTypePopulated, TeamTypeClient, TeamTypePopulated } from "@/lib/types";
+import { MatchTypeLite, PlayerTypePopulated, TeamTypePopulated } from "@/lib/types";
 import axios from "axios";
 import { useState } from "react"
 import { useForm } from "react-hook-form";
-import Bracket from "../../Bracket";
 
 type GenerateMatchesProps = {
     participants:PlayerTypePopulated[] | TeamTypePopulated[],
     categoryId:string,
-    doubles:boolean
 }
 
-export default function GenerateMatches({ participants, categoryId, doubles }:GenerateMatchesProps) {
+export default function GenerateMatches({ participants, categoryId }:GenerateMatchesProps) {
     const [matches, setMatches] = useState<MatchTypeLite[]>([]);
 
     const handleGenerateMatches = () => {
@@ -30,7 +28,7 @@ export default function GenerateMatches({ participants, categoryId, doubles }:Ge
             </button>
             { matches.length > 0 && (
                 <div className="standard-container">
-                    <GeneratedMatches matches={matches} categoryId={categoryId} doubles={doubles} />
+                    <GeneratedMatches matches={matches} categoryId={categoryId} />
                 </div>
             )}
         </div>
@@ -40,12 +38,11 @@ export default function GenerateMatches({ participants, categoryId, doubles }:Ge
 type GeneratedMatchesProps = { 
     matches:MatchTypeLite[],
     categoryId:string
-    doubles:boolean
 }
 
-function GeneratedMatches({ matches, categoryId, doubles }:GeneratedMatchesProps) {
+function GeneratedMatches({ matches, categoryId }:GeneratedMatchesProps) {
     const form = useForm();
-    const { register, control, handleSubmit, formState, watch, reset, setValue, trigger } = form;
+    const { register, handleSubmit, formState } = form;
     const { errors } = formState;
     const [isPending, setIsPending] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -53,9 +50,9 @@ function GeneratedMatches({ matches, categoryId, doubles }:GeneratedMatchesProps
     
     
     const groupByRound = () => {
-        const groups = Array.from({ length: Number(matches[0].tournamentRoundText) }, () => []);
+        const groups: MatchTypeLite[][] = Array.from({ length: Number(matches[0].tournamentRoundText) }, () => []);
 
-        matches.forEach(obj => {
+        matches.forEach((obj: MatchTypeLite) => {
             const roundIndex = Number(obj.tournamentRoundText) - 1;
             groups[roundIndex].push(obj);
         });
@@ -100,7 +97,7 @@ function GeneratedMatches({ matches, categoryId, doubles }:GeneratedMatchesProps
                 { matchesByRound.map((round) => (
                     <Rounds 
                         round={round} totalRounds={Number(matches[0].tournamentRoundText)} 
-                        register={register} doubles={doubles}
+                        register={register}
                         key={round[0].tournamentRoundText} 
                     />
                 ))}
@@ -132,13 +129,12 @@ function GeneratedMatches({ matches, categoryId, doubles }:GeneratedMatchesProps
 }
 
 type RoundsProps = {
-    round:MatchType[],
+    round:MatchTypeLite[],
     totalRounds:number,
-    doubles:boolean
-    register:any
+    register:any // FIXME
 };
 
-function Rounds({ round, totalRounds, register, doubles }:RoundsProps) {
+function Rounds({ round, totalRounds, register }:RoundsProps) {
     let roundNumber;
     const roundDiff = totalRounds - Number(round[0].tournamentRoundText);
     
@@ -163,12 +159,12 @@ function Rounds({ round, totalRounds, register, doubles }:RoundsProps) {
                 <p className="standard-container bg-indigo-600 text-white shadow-none">This is a qualifying round</p>
             )}
             { round.map((match) => (
-                <MatchCard match={match} doubles={doubles} key={match._id} />
+                <MatchCard match={match} key={match._id} />
             ))}
             <div className="standard-container self-end shadow-none bg-indigo-200 w-auto! flex-col flex">
                 <label className="text-right">Deadline for {roundNumber}</label>
                 <input
-                    type="date" className="p-2.5 rounded-md self-end form-input shadow-none! p-1.5!"
+                    type="date" className="rounded-md self-end form-input shadow-none! p-1.5"
                     {...register (`${round[0].tournamentRoundText}`, {
                         required: "Deadline is required"
                     })}
@@ -179,17 +175,16 @@ function Rounds({ round, totalRounds, register, doubles }:RoundsProps) {
 }
 
 type MatchCardProps = { 
-    match:MatchType,
-    doubles:boolean
+    match:MatchTypeLite,
 };
 
-function MatchCard({ match, doubles }:MatchCardProps) {
+function MatchCard({ match }:MatchCardProps) {
     return (
         <div className="flex items-center my-2.5 gap-2.5">
             <div className="standard-container shadow-none bg-slate-100">
                 { match.participants.length > 0 ? (
                     <>
-                        { doubles ? (
+                        { "players" in match.participants[0] ? (
                             <p>{match.participants[0].players[0].user.firstName} {match.participants[0].players[0].user.lastName} and {match.participants[0].players[1].user.firstName} {match.participants[0].players[1].user.lastName}</p>
                         ) : (
                             <p>{match.participants[0].user.firstName} {match.participants[0].user.lastName}</p>
@@ -203,7 +198,7 @@ function MatchCard({ match, doubles }:MatchCardProps) {
             <div className="standard-container shadow-none bg-slate-100">
                 { match.participants.length > 1 ? (
                     <>
-                        { doubles ? (
+                        { "players" in match.participants[1] ? (
                             <p>
                                 {match.participants[1].players[0].user.firstName} {match.participants[1].players[0].user.lastName} and {match.participants[1].players[1].user.firstName} {match.participants[1].players[1].user.lastName}
                             </p>
