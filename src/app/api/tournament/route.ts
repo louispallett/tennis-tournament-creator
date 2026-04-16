@@ -7,19 +7,13 @@ import { NextRequest, NextResponse } from "next/server";
 import Tournament from "@/models/Tournament";
 import { z } from "zod";
 import Category from "@/models/Category";
-import User from "@/models/User";
-import { TournamentTypePopulated } from "@/lib/types";
+import { TournamentType } from "@/lib/types";
 
 export async function GET() {
     try {
         await connectToDB();
     
-        const tournaments:TournamentTypePopulated[] = await Tournament.find()
-            .populate({
-                path: "host",
-                select: "firstname lastname -_id",
-                model: User,
-            });
+        const tournaments:TournamentType[] = await Tournament.find();
         
         if (!tournaments) throw new Error();
 
