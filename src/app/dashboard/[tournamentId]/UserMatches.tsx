@@ -1,6 +1,6 @@
 "use client"
 
-import { MatchType, PlayerType, UserType } from "@/lib/types"
+import { MatchTypePopulated, ParticipantType, PlayerType, PlayerTypePopulated, TeamType, UserType } from "@/lib/types"
 import axios from "axios"
 import { useEffect, useState } from "react"
 import { useRef } from "react";
@@ -8,12 +8,12 @@ import NoInfo from "./NoInfo"
 import SubmitResultsForm from "./SubmitResultsForm";
 
 type UserMatchesProps = { 
-    userMatches:MatchType[],
+    userMatches:MatchTypePopulated[],
     stage:string
 }
 
 export default function UserMatches({ userMatches, stage }:UserMatchesProps) {
-    const [isOpen, setIsOpen] = useState<MatchType | null>(null);
+    const [isOpen, setIsOpen] = useState<MatchTypePopulated | null>(null);
     const matchInfoRef = useRef<HTMLDivElement | null>(null); 
     
     useEffect(() => {
@@ -55,8 +55,8 @@ export default function UserMatches({ userMatches, stage }:UserMatchesProps) {
 
 
 type MatchCardProps = {
-    setIsOpen: (v: MatchType | null) => void,
-    data:MatchType
+    setIsOpen: (v: MatchTypePopulated | null) => void,
+    data:MatchTypePopulated
 }
 
 function MatchCard({ setIsOpen, data }:MatchCardProps) {
@@ -80,12 +80,12 @@ function MatchCard({ setIsOpen, data }:MatchCardProps) {
 
 function MatchInfo({ data, setIsOpen }:MatchCardProps) {
     const [loading, setLoading] = useState(true);
-    const [users, setUsers] = useState(null);
+    const [players, setPlayers] = useState<PlayerTypePopulated[] | null>(null);
     const singles = data.category.name === "Men's Singles" || data.category.name === "Women's Singles";
     
 useEffect(() => {
     const getUserInfo = async () => {
-        const players = [];
+        const players:PlayerTypePopulated[] = [];
 
         for (const participant of data.participants) {
             try {
@@ -94,14 +94,15 @@ useEffect(() => {
                     players.push(response.data);
                 } else {
                     const response = await axios.get(`/api/auth/team/${participant.participantId}`);
-                    players.push(...response.data);
+                    // The response will return a team with team.players as player types.
+                    players.push(...response.data.players);
                 }
             } catch (err) {
                 console.log(err);
             }
             setLoading(false);
         }
-        setUsers(players);
+        setPlayers(players);
     };
 
     getUserInfo();
@@ -120,10 +121,10 @@ useEffect(() => {
                 </div>
                 <div className="standard-container-no-shadow bg-indigo-600/90">
                     <h5 className="text-white">Contact Details</h5>
-                    { users && (
+                    { players && (
                         <div>
-                            { users.map((player: PlayerType) => (
-                                <ContactDetails user={player} key={player._id}/>
+                            { players.map((player: PlayerTypePopulated) => (
+                                <ContactDetails user={player.user} key={player._id}/>
                             ))}
                         </div>
                     )}
@@ -154,7 +155,7 @@ type ContactDetailsProps = { user:UserType };
 function ContactDetails({ user }:ContactDetailsProps) {
     return (
         <div className="grid grid-cols-2 gap-2.5 standard-container-no-shadow bg-slate-50/90 my-1">
-            <p>{user["name-long"]}</p>
+            <p>{user.firstName} {user.lastName}</p>
             <p>{user.mobCode} {user.mobile}</p>
         </div>
     )

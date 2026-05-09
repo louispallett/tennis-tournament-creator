@@ -2,6 +2,8 @@ type BaseType = {
     _id: string
 };
 
+type Replace<T, K extends keyof T, V> = Omit<T, K> & { [P in K]: V };
+
 export interface UserType extends BaseType {
     firstName: string,
     lastName: string,
@@ -78,7 +80,7 @@ export interface MatchTypeLite extends BaseType {
     qualifyingMatch: boolean,
 }
 
-export interface MatchType extends Omit<MatchTypeLite, "participants" | "nextMatchId" | "previousMatchId" > {
+export interface MatchType extends Omit<MatchTypeLite, "participants" | "nextMatchId" | "previousMatchId"> {
     tournament: string,
     category:  string,
     nextMatchId: string | null,
@@ -88,3 +90,19 @@ export interface MatchType extends Omit<MatchTypeLite, "participants" | "nextMat
     date: Date,
     updateNumber: Number,
 };
+
+export interface MatchTypePopulated extends Omit<MatchType, "tournament" | "category"> {
+    tournament: Pick<TournamentTypePopulated, "_id" | "host" | "name" | "stage" | "code" | "startDate" | "showMobile">,
+    category: Pick<CategoryType, "_id" | "name" | "locked" | "doubles">
+    deadline: string
+}
+
+// export interface MatchTypePopulated extends Replace<
+//     MatchType, 
+//     "tournament" | "category",
+//     {
+//         tournament: TournamentTypePopulated;
+//         category: Pick<CategoryType, "_id" | "name" | "locked" | "doubles">;
+//     }
+// > {}
+

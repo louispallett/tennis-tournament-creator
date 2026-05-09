@@ -1,7 +1,7 @@
 import { getMatchesByTournament, getUserMatches } from "@/lib/matches";
 import { getPlayerByUser, getPlayersByTournament } from "@/lib/players";
 import { getTeamsByTournament, getUserTeams } from "@/lib/teams";
-import { getTournamentById } from "@/lib/tournaments";
+import { getPopulatedTournamentById, getTournamentById } from "@/lib/tournaments";
 import { CategoryType, MatchType, PlayerType, TeamType, TeamTypePopulated, TournamentType, TournamentTypePopulated } from "@/lib/types";
 import { jwtVerify } from "jose";
 import { cookies } from "next/headers";
@@ -33,7 +33,7 @@ export default async function Tournament({ params }: { params: { tournamentId: s
     const { tournamentId } = await params;
     let tournament;
     try {
-        tournament = await getTournamentById(tournamentId);
+        tournament = await getPopulatedTournamentById(tournamentId);
         if (!tournament) {
             notFound();
         }
